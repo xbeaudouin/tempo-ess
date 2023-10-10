@@ -4,6 +4,7 @@ import urllib3
 import json
 import paho.mqtt.client as mqtt
 import time
+import syslog
 
 # Settings
 from secret import ecodevice,gx,gxsn,chgbleu,chgblanc,chgrouge,minbleu,minblanc,minrouge
@@ -16,6 +17,10 @@ from secret import ecodevice,gx,gxsn,chgbleu,chgblanc,chgrouge,minbleu,minblanc,
 ESSwBL  = 1     # ESS "Optimized with BatteryLife)
 ESSwoBL = 10    # ESS "Optimized without BatteryLife)
 
+def loggerinfo(foo):
+    syslog.syslog(foo)
+    print(foo)
+
 # Setup MQTT Client
 global client
 
@@ -23,21 +28,18 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("$SYS/#")
     global flagConntected
     flagConntected = 1 
-    #logger.info("Broker connected.")
-    print("Broker connected.")
+    loggerinfo("Broker connected.")
 
 def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
+    loggerinfo(msg.topic+" "+str(msg.payload))
 
 def on_publish(client, userdata, mid):
-    #logger.info("Message Published.")    
-    print("Message Published.")    
+    loggerinfo("Message Published.")    
 
 def on_disconnect(client, userdata, rc):
     global flagConntected
     flagConntected = 0  
-    #logger.info("Broker disconnected.")
-    print("Broker disconnected.")
+    loggerinfo("Broker disconnected.")
 
 client = mqtt.Client("clientdynTEMPO")
 flagConntected = 0
@@ -48,16 +50,11 @@ client.on_disconnect = on_disconnect
 #client.tls_set("venus-ca.crt")
 #client.username_pw_set(username, password)       
 
-# Setup logfile
-#logzero.logfile("log.log", maxBytes=1e6, backupCount=3)
-
 # Set the Maxmium SOC when schedule Charge
 def setChargeSetpoint(chargepoint):
-    #logger.info("Set charge setpoint: " + str(chargepoint) + " %")
-    print("Set charge setpoint: " + str(chargepoint) + " %")
+    loggerinfo("Set charge setpoint: " + str(chargepoint) + " %")
     if (chargepoint < 50) or (chargepoint > 100):
-        #logger.info("Chargepoint should be between 50 to 100%")
-        print("Chargepoint should be between 50 to 100%")
+        loggerinfo("Chargepoint should be between 50 to 100%")
     else:
         # Control ESS over MQTT
         client.connect(gx, 1883, keepalive=60)
@@ -70,11 +67,9 @@ def setChargeSetpoint(chargepoint):
 
 # Set the Minimum Soc Limit
 def setMinSocSetpoint(chargepoint):
-    #logger.info("Set MinSoc setpoint: " + str(chargepoint) + " %")
-    print("Set MinSoc setpoint: " + str(chargepoint) + " %")
+    loggerinfo("Set MinSoc setpoint: " + str(chargepoint) + " %")
     if (chargepoint < 10) or (chargepoint > 40):
-        #logger.info("Chargepoint should be between 50 to 100%")
-        print("Chargepoint should be between 10 to 40%")
+        loggerinfo("Chargepoint should be between 50 to 100%")
     else:
         # Control ESS over MQTT
         client.connect(gx, 1883, keepalive=60)
@@ -90,8 +85,7 @@ def setMinSocSetpoint(chargepoint):
 # 10 = Optimized without battery life
 # See https://github.com/victronenergy/venus/wiki/dbus#settings
 def setESSstate(state):
-    #logger.info("Set ESS State: " + str(state) )
-    print("Set ESS State: " + str(state) )
+    loggerinfo("Set ESS State: " + str(state) )
     # Security Checks
     if (state == 1 or state == 10):
         # Control ESS over MQTT
@@ -104,19 +98,14 @@ def setESSstate(state):
         lastChargeCondition = 1
         client.loop_stop()  
     else:
-        #logger.info(" -> not published")
-        print(" -> not published")
+        loggerinfo(" -> not published")
 
 # Setup EcoDevice
 http = urllib3.PoolManager()
 resp = http.request("GET", "http://"+ecodevice+"/api/xdevices.json?cmd=10")
 
-#print("resp.status = "+str(resp.status))
 if resp.status == 200:
-    #print("Having data -> decode")
     teleinfo = json.loads(resp.data)
-
-    #print(json.dumps(teleinfo, sort_keys=True, indent=4))
 
     # Value of var  today   daynight
     # HPJB = Bleu   0       1
@@ -166,8 +155,8 @@ if resp.status == 200:
         tomorrow=0
 
 
-    print("Current tarif: " + curtarif + " ("+str(today)+" / "+str(daynight) + ")")
-    print("Demain tarif:  " + demaintarif + " ("+str(tomorrow)+")")
+    loggerinfo("Current tarif: " + curtarif + " ("+str(today)+" / "+str(daynight) + ")")
+    loggerinfo("Demain tarif:  " + demaintarif + " ("+str(tomorrow)+")")
 
 # daynight : 1 = jour / 0 nuit
 #   Today       Tomorrow    Daynight    Action
@@ -193,56 +182,56 @@ if resp.status == 200:
 #tomorrow = 0
 #daynight = 0
 if today == tomorrow:
-        print ("Rien a faire on sort")
+        loggerinfo ("Rien a faire on sort")
 elif today == 0:        # Bleu
     if tomorrow == 1:   # Blanc
         if daynight == 1:
-            print ("Charge 90%")
+            loggerinfo ("Charge 90%")
             setChargeSetpoint(chgblanc)
     elif tomorrow == 2: # Rouge
         if daynight == 1:
-            print ("Charge 95%")
+            loggerinfo ("Charge 95%")
             setChargeSetpoint(chgrouge)
         else:
-            print ("SocMin 25%")
+            loggerinfo ("SocMin 25%")
             setMinSocSetpoint(minrouge)
-            print ("Battery life OFF")
+            loggerinfo ("Battery life OFF")
             setESSstate(ESSwoBL)
 elif today == 1:        # Blanc
     if tomorrow == 0:   # Bleu
         if daynight == 1:
-            print ("Charge 80%")
+            loggerinfo ("Charge 80%")
             setChargeSetpoint(chgbleu)
         else:
-            print ("SocMin 30%")
+            loggerinfo ("SocMin 30%")
             setMinSocSetpoint(minbleu)
     elif tomorrow == 2: # Rouge
         if daynight == 1:
-            print ("Charge 95%")
+            loggerinfo ("Charge 95%")
             setChargeSetpoint(chgrouge)
         else:
-            print ("SocMin 25%")
+            loggerinfo ("SocMin 25%")
             setMinSocSetpoint(minrouge)
-            print ("Battery life OFF")
+            loggerinfo ("Battery life OFF")
             setESSstate(ESSwoBL)
 elif today == 2:        # Rouge
     if tomorrow == 0:   # Bleu
         if daynight == 1:
-            print ("Charge 80%")
+            loggerinfo ("Charge 80%")
             setChargeSetpoint(chgbleu)
         else:
-            print ("SocMin 30%")
+            loggerinfo ("SocMin 30%")
             setChargeSetpoint(chgbleu)
-            print ("Battery life ON")
+            loggerinfo ("Battery life ON")
             setESSstate(ESSwBL)
     elif tomorrow == 1: # Blanc
         if daynight == 1:
-            print ("Charge 90%")
+            loggerinfo ("Charge 90%")
             setChargeSetpoint(chgblanc)
         else:
-            print ("SocMin 30%")
+            loggerinfo ("SocMin 30%")
             setMinSocSetpoint(minblanc)
-            print ("Battery life ON")
+            loggerinfo ("Battery life ON")
             setESSstate(ESSwBL)
 
 # Voir code : https://github.com/xbeaudouin/dynamic-ess
