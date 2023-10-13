@@ -4,7 +4,7 @@ import urllib3
 import json
 import paho.mqtt.client as mqtt
 import time
-import syslog
+#import syslog
 
 # Settings
 from secret import ecodevice,gx,gxsn,chgbleu,chgblanc,chgrouge,minbleu,minblanc,minrouge
@@ -17,8 +17,9 @@ from secret import ecodevice,gx,gxsn,chgbleu,chgblanc,chgrouge,minbleu,minblanc,
 ESSwBL  = 1     # ESS "Optimized with BatteryLife)
 ESSwoBL = 10    # ESS "Optimized without BatteryLife)
 
+# Log !
 def loggerinfo(foo):
-    syslog.syslog(foo)
+    #syslog.syslog(syslog.LOG_INFO,foo)
     print(foo)
 
 # Setup MQTT Client
