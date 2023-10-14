@@ -4,10 +4,11 @@ import urllib3
 import json
 import paho.mqtt.client as mqtt
 import time
+import pyprowl
 #import syslog
 
 # Settings
-from secret import ecodevice,gx,gxsn,chgbleu,chgblanc,chgrouge,minbleu,minblanc,minrouge
+from secret import ecodevice,gx,gxsn,chgbleu,chgblanc,chgrouge,minbleu,minblanc,minrouge,prowlkey
 
 # Lancer ceci du 01 Oct au 31 mai
 # une fois avant 22h / une fois apres 22h
@@ -16,6 +17,12 @@ from secret import ecodevice,gx,gxsn,chgbleu,chgblanc,chgrouge,minbleu,minblanc,
 # See : https://github.com/victronenergy/venus/wiki/dbus#settings
 ESSwBL  = 1     # ESS "Optimized with BatteryLife)
 ESSwoBL = 10    # ESS "Optimized without BatteryLife)
+
+p = pyprowl.Prowl(prowlkey)
+
+def sendprowl(foo):
+   p.notify(event='EDF TEMPO', description='Attention EDF Tarif: '+foo,
+            priority=0, appName='EDF TEMPO')
 
 # Log !
 def loggerinfo(foo):
@@ -100,6 +107,13 @@ def setESSstate(state):
         client.loop_stop()  
     else:
         loggerinfo(" -> not published")
+
+# Setup Prowl
+try:
+    p.verify_key()
+except Exception as e:
+    print("Error verifying Prowl API key: {}".format(e))
+    exit()
 
 # Setup EcoDevice
 http = urllib3.PoolManager()
@@ -187,11 +201,13 @@ if today == tomorrow:
 elif today == 0:        # Bleu
     if tomorrow == 1:   # Blanc
         if daynight == 1:
+            sendprowl('BLANC')
             loggerinfo ("Charge 90%")
             setChargeSetpoint(chgblanc)
     elif tomorrow == 2: # Rouge
         if daynight == 1:
             loggerinfo ("Charge 95%")
+            sendprowl('ROUGE')
             setChargeSetpoint(chgrouge)
         else:
             loggerinfo ("SocMin 25%")
@@ -203,11 +219,13 @@ elif today == 1:        # Blanc
         if daynight == 1:
             loggerinfo ("Charge 80%")
             setChargeSetpoint(chgbleu)
+            sendprowl('BLEU')
         else:
             loggerinfo ("SocMin 30%")
             setMinSocSetpoint(minbleu)
     elif tomorrow == 2: # Rouge
         if daynight == 1:
+            sendprowl('ROUGE')
             loggerinfo ("Charge 95%")
             setChargeSetpoint(chgrouge)
         else:
@@ -220,6 +238,7 @@ elif today == 2:        # Rouge
         if daynight == 1:
             loggerinfo ("Charge 80%")
             setChargeSetpoint(chgbleu)
+            sendprowl('BLEU')
         else:
             loggerinfo ("SocMin 30%")
             setChargeSetpoint(chgbleu)
@@ -227,6 +246,7 @@ elif today == 2:        # Rouge
             setESSstate(ESSwBL)
     elif tomorrow == 1: # Blanc
         if daynight == 1:
+            sendprowl('BLANC')
             loggerinfo ("Charge 90%")
             setChargeSetpoint(chgblanc)
         else:
