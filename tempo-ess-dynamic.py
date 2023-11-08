@@ -7,6 +7,8 @@ import time
 import pyprowl
 #import syslog
 
+from datetime import date,datetime
+
 # Settings
 from secret import ecodevice,gx,gxsn,chgbleu,chgblanc,chgrouge,minbleu,minblanc,minrouge,prowlkey
 
@@ -115,63 +117,107 @@ except Exception as e:
     print("Error verifying Prowl API key: {}".format(e))
     exit()
 
-# Setup EcoDevice
+
 http = urllib3.PoolManager()
-resp = http.request("GET", "http://"+ecodevice+"/api/xdevices.json?cmd=10")
+if use_eco:
+    # Setup EcoDevice
+    resp = http.request("GET", "http://"+ecodevice+"/api/xdevices.json?cmd=10")
 
-if resp.status == 200:
-    teleinfo = json.loads(resp.data)
+    if resp.status == 200:
+        teleinfo = json.loads(resp.data)
 
-    # Value of var  today   daynight
-    # HPJB = Bleu   0       1
-    # HCJB = Bleu   0       0
-    # HPJW = Blanc  1       1
-    # HCJW = Blanc  1       0
-    # HPJR = Rouge  2       1
-    # HCJR = Rouge  2       0
-    curtarif = teleinfo['T1_PTEC']
-    if curtarif == "HPJB":
+        # Value of var  today   daynight
+        # HPJB = Bleu   0       1
+        # HCJB = Bleu   0       0
+        # HPJW = Blanc  1       1
+        # HCJW = Blanc  1       0
+        # HPJR = Rouge  2       1
+        # HCJR = Rouge  2       0
+        curtarif = teleinfo['T1_PTEC']
+        if curtarif == "HPJB":
+                today = 0
+                daynight = 1
+        elif curtarif == "HCJB":
+                today = 0
+               daynight = 0
+        elif curtarif == "HPJW":
+                today = 1
+                daynight = 1
+        elif curtarif == "HCJW":
+                today = 1
+                daynight = 0
+        elif curtarif == "HPJR":
+                today = 2
+                daynight = 1
+        elif curtarif == "HCJR":
+                today = 2
+                daynight = 0
+        else:
+                today = 0
+                daynight = 0
+
+
+        # Value of var  tomorrow
+        # ---- = Bleu   0
+        # BLEU = Bleu   0
+        # BLAN = Blanc  1
+        # ROUG = Rouge  2
+        demaintarif = teleinfo['T1_DEMAIN']
+        if demaintarif == "----":
+            tomorrow = 0
+        elif demaintarif == "BLEU":
+            tomorrow = 0
+        elif demaintarif == "BLANC":
+            tomorrow = 1
+        elif demaintarif == "ROUG":
+            tomorrow = 2
+        else:
+            tomorrow=0
+
+        loggerinfo("Current tarif: " + curtarif + " ("+str(today)+" / "+str(daynight) + ")")
+        loggerinfo("Demain tarif:  " + demaintarif + " ("+str(tomorrow)+")")
+
+else:
+    # Use EDF "API"
+    # TODO:
+    today=date.today()
+    resp = http.request("GET", "https://particulier.edf.fr/services/rest/referentiel/searchTempoStore?dateRelevant="+str(date..strftime("%Y-%m-%d")))
+    if resp.status == 200:
+        edfapi = json.loads(resp.data)
+        curcouleur = edfapi['couleurJourJ']
+        demaincouleur = edfapi['couleurJourJ1']
+
+        if curcouleur == "TEMPO_BLEU":
             today = 0
-            daynight = 1
-    elif curtarif == "HCJB":
-            today = 0
-            daynight = 0
-    elif curtarif == "HPJW":
+        elif curcouleur == "TEMPO_BLANC":
             today = 1
-            daynight = 1
-    elif curtarif == "HCJW":
-            today = 1
-            daynight = 0
-    elif curtarif == "HPJR":
+        elif curcouleur == "TEMPO_ROUGE":
             today = 2
+        else:
+            today = -1
+
+        if demaincouleur == "TEMPO_BLEU":
+            tomorrow = 0
+        elif domaincouleur == "TEMPO_BLANC":
+            tomorrow = 1
+        elif demaincouleur == "TEMPO_ROUGE":
+            tomorrow = 2
+        elif demaincouleur == "NON_DEFINI":
+            tomorrow = -1
+        else:
+            tomorrow = -1   # trop tot.
+
+        now = datetime.now()
+        #Heures creuses: 22h00 -> 06h00 
+        if now.hour >= 6 and now.hour <=22:
             daynight = 1
-    elif curtarif == "HCJR":
-            today = 2
-            daynight = 0
-    else:
-            today = 0
+        else:
             daynight = 0
 
-    # Value of var  tomorrow
-    # ---- = Bleu   0
-    # BLEU = Bleu   0
-    # BLAN = Blanc  1
-    # ROUG = Rouge  2
-    demaintarif = teleinfo['T1_DEMAIN']
-    if demaintarif == "----":
-        tomorrow = 0
-    elif demaintarif == "BLEU":
-        tomorrow = 0
-    elif demaintarif == "BLANC":
-        tomorrow = 1
-    elif demaintarif == "ROUG":
-        tomorrow = 2
-    else:
-        tomorrow=0
+if tomorrow == -1:
+        loggerinfo("La couleur de demain n'est pas dÃfinie -> exit")
+        quit()
 
-
-    loggerinfo("Current tarif: " + curtarif + " ("+str(today)+" / "+str(daynight) + ")")
-    loggerinfo("Demain tarif:  " + demaintarif + " ("+str(tomorrow)+")")
 
 # daynight : 1 = jour / 0 nuit
 #   Today       Tomorrow    Daynight    Action
