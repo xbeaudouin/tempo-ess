@@ -10,7 +10,7 @@ import pyprowl
 from datetime import date,datetime
 
 # Settings
-from secret import ecodevice,gx,gxsn,chgbleu,chgblanc,chgrouge,minbleu,minblanc,minrouge,prowlkey
+from secret import ecodevice,use_eco,gx,gxsn,chgbleu,chgblanc,chgrouge,minbleu,minblanc,minrouge,prowlkey
 
 # Lancer ceci du 01 Oct au 31 mai
 # une fois avant 22h / une fois apres 22h
@@ -139,7 +139,7 @@ if use_eco:
                 daynight = 1
         elif curtarif == "HCJB":
                 today = 0
-               daynight = 0
+                daynight = 0
         elif curtarif == "HPJW":
                 today = 1
                 daynight = 1
@@ -181,7 +181,7 @@ else:
     # Use EDF "API"
     # TODO:
     today=date.today()
-    resp = http.request("GET", "https://particulier.edf.fr/services/rest/referentiel/searchTempoStore?dateRelevant="+str(date..strftime("%Y-%m-%d")))
+    resp = http.request("GET", "https://particulier.edf.fr/services/rest/referentiel/searchTempoStore?dateRelevant="+str(today.strftime("%Y-%m-%d")))
     if resp.status == 200:
         edfapi = json.loads(resp.data)
         curcouleur = edfapi['couleurJourJ']
@@ -214,8 +214,10 @@ else:
         else:
             daynight = 0
 
+        loggerinfo("La couleur aujourd'hui "+str(curcouleur))
+        loggerinfo("La couleur demain      "+str(demaincouleur))
 if tomorrow == -1:
-        loggerinfo("La couleur de demain n'est pas dÃfinie -> exit")
+        loggerinfo("La couleur de demain n'est pas definie -> exit")
         quit()
 
 
