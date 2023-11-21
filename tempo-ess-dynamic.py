@@ -198,7 +198,7 @@ else:
 
         if demaincouleur == "TEMPO_BLEU":
             tomorrow = 0
-        elif domaincouleur == "TEMPO_BLANC":
+        elif demaincouleur == "TEMPO_BLANC":
             tomorrow = 1
         elif demaincouleur == "TEMPO_ROUGE":
             tomorrow = 2
