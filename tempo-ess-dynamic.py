@@ -72,7 +72,7 @@ def setChargeSetpoint(chargepoint):
         # Wait for connecting
         while not flagConntected:
             time.sleep(1)
-        client.publish("W/" + gxsn + "/settings/0/Settings/CGwacs/BatteryLife/Schedule/Charge/O/Soc", '{"value":' + str(chargepoint) + '}')
+        client.publish("W/" + gxsn + "/settings/0/Settings/CGwacs/BatteryLife/Schedule/Charge/0/Soc", '{"value":' + str(chargepoint) + '}')
         client.loop_stop()  
 
 # Set the Minimum Soc Limit
