@@ -167,7 +167,7 @@ if use_eco:
             tomorrow = 0
         elif demaintarif == "BLEU":
             tomorrow = 0
-        elif demaintarif == "BLANC":
+        elif demaintarif == "BLAN":
             tomorrow = 1
         elif demaintarif == "ROUG":
             tomorrow = 2
