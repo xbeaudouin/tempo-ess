@@ -253,55 +253,55 @@ elif today == 0:        # Bleu
     if tomorrow == 1:   # Blanc
         if daynight == 1:
             sendprowl('BLANC')
-            loggerinfo ("Charge 90%")
+            loggerinfo ("Charge "+str(chgblanc)+"%")
             setChargeSetpoint(chgblanc)
     elif tomorrow == 2: # Rouge
         if daynight == 1:
-            loggerinfo ("Charge 95%")
+            loggerinfo ("Charge "+str(chgrouge)+"%")
             sendprowl('ROUGE')
             setChargeSetpoint(chgrouge)
         else:
-            loggerinfo ("SocMin 25%")
+            loggerinfo ("SocMin "+str(minrouge)+"%")
             setMinSocSetpoint(minrouge)
             loggerinfo ("Battery life OFF")
             setESSstate(ESSwoBL)
 elif today == 1:        # Blanc
     if tomorrow == 0:   # Bleu
         if daynight == 1:
-            loggerinfo ("Charge 80%")
+            loggerinfo ("Charge "+str(chgbleu)+"%")
             setChargeSetpoint(chgbleu)
             sendprowl('BLEU')
         else:
-            loggerinfo ("SocMin 30%")
+            loggerinfo ("SocMin "+str(minbleu)+"%")
             setMinSocSetpoint(minbleu)
     elif tomorrow == 2: # Rouge
         if daynight == 1:
             sendprowl('ROUGE')
-            loggerinfo ("Charge 95%")
+            loggerinfo ("Charge "+str(chgrouge)+"%")
             setChargeSetpoint(chgrouge)
         else:
-            loggerinfo ("SocMin 25%")
+            loggerinfo ("SocMin "+str(minrouge)+"%")
             setMinSocSetpoint(minrouge)
             loggerinfo ("Battery life OFF")
             setESSstate(ESSwoBL)
 elif today == 2:        # Rouge
     if tomorrow == 0:   # Bleu
         if daynight == 1:
-            loggerinfo ("Charge 80%")
+            loggerinfo ("Charge "+str(chgbleu)+"%")
             setChargeSetpoint(chgbleu)
             sendprowl('BLEU')
         else:
-            loggerinfo ("SocMin 30%")
-            setChargeSetpoint(chgbleu)
+            loggerinfo ("SocMin "+str(minbleu)+"%")
+            setMinSocSetpoint(minbleu)
             loggerinfo ("Battery life ON")
             setESSstate(ESSwBL)
     elif tomorrow == 1: # Blanc
         if daynight == 1:
             sendprowl('BLANC')
-            loggerinfo ("Charge 90%")
+            loggerinfo ("Charge "+str(chgblanc)+"%")
             setChargeSetpoint(chgblanc)
         else:
-            loggerinfo ("SocMin 30%")
+            loggerinfo ("SocMin "+str(minblanc)+"%")
             setMinSocSetpoint(minblanc)
             loggerinfo ("Battery life ON")
             setESSstate(ESSwBL)
