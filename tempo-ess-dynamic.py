@@ -179,7 +179,6 @@ if use_eco:
 
 else:
     # Use EDF "API"
-    # TODO:
     today=date.today()
     resp = http.request("GET", "https://particulier.edf.fr/services/rest/referentiel/searchTempoStore?dateRelevant="+str(today.strftime("%Y-%m-%d")))
     if resp.status == 200:
@@ -209,9 +208,13 @@ else:
 
         now = datetime.now()
         #Heures creuses: 22h00 -> 06h00 
+        loggerinfo("Current hour : "+str(now.hour))
+
         if now.hour >= 6 and now.hour <=22:
+            loggerinfo("We are DAY")
             daynight = 1
         else:
+            loggerinfo("We are NIGHT")
             daynight = 0
 
         loggerinfo("La couleur aujourd'hui "+str(curcouleur))
