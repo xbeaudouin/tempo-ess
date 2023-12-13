@@ -94,6 +94,7 @@ Je ne vais pas expliquer comment configurer un Multiplus avec un GX en ESS mais 
 ### Activer le broker MQTT sur GX
 
 Dans Settings -> Services, activez MQTT on LAN (SSL), _puis_ MQTT on LAN (Plaintext) :
+
 ![MQTT Settings](/img/gx-mqtt.png)
 
 Pour l'instant le code ne prévois pas de se connecter en MQTT over SSL.
@@ -106,7 +107,9 @@ selon les jours Bleu, Blanc et Rouge.
 *Si vous ne voulez pas utiliser cette feature* il _suffit juste_ de laisser ce schedule a inactif.
 
 Dans Settings -> ESS -> Scheduled charge levels -> Schedule 1 (capture prise en veille de jour Blanc) :
+
 ![Schedule 1](/img/schedule1.png)
+
 ![Schedule 1 Settings](/img/schedule1-settings.png)
 
 ## Configuration du code 
