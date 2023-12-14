@@ -61,7 +61,7 @@ C'est le tarif moins cher donc on est en mode "openbar" :
 Le tarifs est un peu plus cher en heures pleines donc on vas limiter la conso 
 le matin (machine a café, grille pain,...)
 
-- Recharge de la batterie à 90% sur schedule 0
+- Recharge de la batterie à 90% sur schedule 1
 - Batterie Life : On
 - Min Soc : 30%
 
@@ -72,7 +72,7 @@ sur le backup Gaz pour la préchauffe du circuit d'eau chauffage.
 
 ### Jour ROUGE
 
-- Recharge de la batterie à 100% sur schedule 0
+- Recharge de la batterie à 100% sur schedule 1
 - Batterie Life : Off
 - Min Soc : 25%
 
