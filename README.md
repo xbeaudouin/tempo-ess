@@ -139,7 +139,7 @@ Copiez le fichier `secret.py.exemple` en `secret.py` et remplissez les variables
 Le code a besoin des modules python suivants :
 
 - urllib3
-- paho.mqtt.client
+- paho_mqtt
 - pyprowl
 
 Ces dependances peuvent être installées :
