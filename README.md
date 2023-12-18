@@ -139,11 +139,15 @@ Copiez le fichier `secret.py.exemple` en `secret.py` et remplissez les variables
 Le code a besoin des modules python suivants :
 
 - urllib3
-- json
 - paho.mqtt.client
-- time
 - pyprowl
-- datetime
+
+Ces dependances peuvent être installées :
+
+```
+pip3 install -r requirements.txt
+```
+
 
 Cette partie est a voir avec votre distribution linux.
 
