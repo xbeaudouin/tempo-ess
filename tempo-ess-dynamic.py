@@ -12,6 +12,7 @@ from datetime import date,datetime
 # Settings
 from secret import ecodevice,use_eco,gx,gxsn,chgbleu,chgblanc,chgrouge,minbleu,minblanc,minrouge,prowlkey
 
+
 # Lancer ceci du 01 Oct au 31 mai
 # une fois avant 22h / une fois apres 22h
 
@@ -23,7 +24,7 @@ ESSwoBL = 10    # ESS "Optimized without BatteryLife)
 p = pyprowl.Prowl(prowlkey)
 
 def sendprowl(foo):
-   p.notify(event='EDF TEMPO', description='Attention EDF Tarif: '+foo,
+    p.notify(event='EDF TEMPO', description='Attention EDF Tarif: '+foo,
             priority=0, appName='EDF TEMPO')
 
 # Log !
